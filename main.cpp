@@ -77,8 +77,8 @@ public:
 	
 	Platform() {
 		
-		middle.loadFromFile("dirt.png");
-		endplat.loadFromFile("dirtkoniec.png");
+		middle.loadFromFile("assets/dirt.png");
+		endplat.loadFromFile("assets/dirtkoniec.png");
 		end.shape.setTexture(endplat);
 		middle.setRepeated(true);
 		middlee.shape.setTexture(middle);
@@ -130,11 +130,10 @@ int colide() {
 
 
 }
-
+/*
 
 void map_init() {
-	doors_txt.loadFromFile("door.png");
-	treasure_txt.loadFromFile("skarb.png");
+
 	platforms[0].Position = Vector2f(140, 600);
 	platforms[0].Size = Vector2f(200, 40);
 	platforms[1].Position = Vector2f(100, 200);
@@ -150,7 +149,7 @@ void map_init() {
 
 
 }
-
+*/
 
 void mapf_init(std::string &mapfilename){
 
@@ -224,7 +223,7 @@ void mapf_init(std::string &mapfilename){
 			std::string arg2;
 			mapf >> arg2;
 			if(arg2 == "tre"){
-				treasure_txt.loadFromFile("skarb.png");
+				treasure_txt.loadFromFile("assets/skarb.png");
 				dot = 1;
 				treasure = new Obstacle[1];
 				treasure[0].Size = Vector2f(60,40);
@@ -238,15 +237,16 @@ void mapf_init(std::string &mapfilename){
 				}
 				treasure[0].update();
 			}else if (arg2 == "door"){
-				doors[0].Size = Vector2f(50, 50);
+				doors[0].Size = Vector2f(40, 60);
 				
 				
 				mapf >> mapfilename;
-				
+				mapf >> arg2;
 				if(arg2 == "pos"){
 					int val2, val3{0};
 					mapf >> val2 >> val3;
-					doors[0].x_y = Vector2f(1000, 110);
+					doors[0].x_y = Vector2f(val2, val3);
+					doors[0].update();
 				}
 					
 				}
@@ -330,6 +330,11 @@ void mapf_init(std::string &mapfilename){
 	
 int main()
 {
+	doors_txt.loadFromFile("assets/door.png");
+	
+	
+	doors[0].update();
+	doors[0].shape.setTexture(doors_txt);
 	player_idle.setSmooth(0);
 	player_txt1.setSmooth(0);
 	player_txt2.setSmooth(0);
@@ -340,19 +345,19 @@ int main()
 	view.setSize(Vector2f(1280, 720));
 	window.setView(view);
 	
-	font.loadFromFile("arial.ttf");
-	player_idle.loadFromFile("Idle.png");
-	std::string nextmapname = "fmap.map";	
+	font.loadFromFile("assets/arial.ttf");
+	player_idle.loadFromFile("assets/Idle.png");
+	std::string nextmapname = "maps/fmap.map";	
 
 	Clock timer;
-	player_txt1.loadFromFile("playerrun1.png");
-	player_txt2.loadFromFile("playerrun2.png");
-	jump_txt.loadFromFile("jump.png");
+	player_txt1.loadFromFile("assets/playerrun1.png");
+	player_txt2.loadFromFile("assets/playerrun2.png");
+	jump_txt.loadFromFile("assets/jump.png");
 	player.setPosition(40, 400);
 	float fall = 0;
 	
-	map_init();
-	
+	//map_init();
+	mapf_init(nextmapname);
 
 	window.setFramerateLimit(120);
 	middle.setSmooth(0);
