@@ -8,5 +8,6 @@ To build the library for the latest version of the game run:
 
 ``` mkdir build && cd build && cmake .. && cmake --build . ```
 
-
 **Remember to be in game directory!**
+
+Game is now compiled in build subdirectory of repo.
