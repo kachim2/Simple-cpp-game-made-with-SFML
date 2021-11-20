@@ -10,4 +10,4 @@ To build the library for the latest version of the game run:
 
 **Remember to be in game directory!**
 
-Game is now compiled in build subdirectory of repo.
+Game is now compiled in build subdirectory of local repository.
