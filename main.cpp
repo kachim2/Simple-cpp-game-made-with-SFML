@@ -1,7 +1,6 @@
 #include <SFML/Graphics.hpp> // gra używa biblioteki SFML ze strony https://www.sfml-dev.org/
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
-#include <vector>
 #include <fstream>
 #include <iostream>
 bool dot = 0;
@@ -254,6 +253,7 @@ void mapf_init(std::string &mapfilename){
 		}else if(arg == "mapsize"){
 			mapf >> mapsize.x >> mapsize.y;
 			ground.setPosition(Vector2f(0, mapsize.y-33));
+			ground.setTextureRect(IntRect(0, 0, mapsize.x, 37));
 		}else if(arg == "killertxtnum"){
 			int arg2 = 0;
 			mapf >> arg2;
@@ -275,7 +275,7 @@ void mapf_init(std::string &mapfilename){
 				mapf >> index;
 				if (index != "end"){
 					killer[stoi(index)].shape.setTexture(killer_txt[ind]);
-				}
+				}else{check = 0;}
 			}
 
 		}
