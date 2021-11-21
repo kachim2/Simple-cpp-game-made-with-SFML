@@ -1,0 +1,15 @@
+killertxtnum 2
+killertxt 0 assets/lava.png
+killertxt 1 assets/kolec.png
+killern 2
+platformn 5
+mapsize 1800 720
+killer 0 size 1180 40 pos 100 680
+killer 1 size 400 40 pos 1290 60
+platform 0 size 200 40 pos 170 620
+platform 1 size 400 40 pos 100 200
+platform 2 size 400 40 pos 450 450
+platform 3 size 400 40 pos 700 150
+platform 4 size 400 40 pos 1300 200
+dot tre pos 1500 160
+killertxtindex 1 1 end
