@@ -6,7 +6,7 @@ Remember to clone Repository recursively
 ## Compilation
 To build the library for the latest version of the game run:
 
-``` mkdir build && cd build && cmake .. && cmake --build . ```
+``` mkdir build && cd build && cmake -G "Unix Makefiles" .. && cmake --build . ```
 
 **Remember to be in game directory!**
 
