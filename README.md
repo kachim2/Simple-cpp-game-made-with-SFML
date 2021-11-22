@@ -1,4 +1,15 @@
 # Simple-cpp-game-made-with-SFML
+
+## Dependiencies
+
+cmake
+
+git
+
+Windows only:
+
+Mingw
+
 ## Download code
 Remember to clone Repository recursively
 
