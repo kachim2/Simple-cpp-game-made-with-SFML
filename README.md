@@ -6,7 +6,7 @@ cmake
 
 git
 
-Windows only:
+### Windows only:
 
 Mingw
 
