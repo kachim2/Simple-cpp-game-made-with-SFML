@@ -6,7 +6,7 @@ cmake
 
 git
 
-C++ compiler
+C++ compiler with c++ 11 support
 
 ## Download code
 Remember to clone Repository recursively
