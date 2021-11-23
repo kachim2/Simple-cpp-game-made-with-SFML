@@ -6,9 +6,7 @@ cmake
 
 git
 
-### Windows only:
-
-Mingw
+C++ compiler
 
 ## Download code
 Remember to clone Repository recursively
@@ -16,8 +14,12 @@ Remember to clone Repository recursively
 ``` git clone https://github.com/kachim2/Simple-cpp-game-made-with-SFML.git --recursive ```
 ## Compilation
 To build the library for the latest version of the game run:
+### Widows/Linux
+``` mkdir build && cd build && cmake .. && cmake --build . ```
+### Mac Os
+Xcode might not work so you should use Unix makefiles
 
-``` mkdir build && cd build && cmake -G "Unix Makefiles" .. && cmake --build . ```
+``` mkdir build && cd build && cmake .. -G "Unix Makefiles" && cmake --build . ```
 
 **Remember to be in game directory!**
 
