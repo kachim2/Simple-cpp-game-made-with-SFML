@@ -274,7 +274,7 @@ void mapf_init(std::string &mapfilename){
 			while(check){
 				mapf >> index;
 				if (index != "end"){
-					killer[stoi(index)].shape.setTexture(killer_txt[ind]);
+					killer[std::stoi(index)].shape.setTexture(killer_txt[ind]);
 				}else{check = 0;}
 			}
 
