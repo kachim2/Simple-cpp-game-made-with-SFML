@@ -17,6 +17,7 @@ To build the library for the latest version of the game run:
 ### Widows/Linux
 ``` mkdir build && cd build && cmake .. && cmake --build . ```
 ### Mac Os
+## Unsupported!!!
 Xcode might not work so you should use Unix makefiles
 
 ``` mkdir build && cd build && cmake .. -G "Unix Makefiles" && cmake --build . ```
