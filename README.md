@@ -16,6 +16,9 @@ Remember to clone Repository recursively
 To build the library for the latest version of the game run:
 ### Widows/Linux
 ``` mkdir build && cd build && cmake .. && cmake --build . ```
+#### On Linux you'll have to install systemd-devel
+
+
 ### Mac Os
 #### Unsupported!!!
 Xcode might not work so you should use Unix makefiles
