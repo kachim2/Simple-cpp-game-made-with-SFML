@@ -23,19 +23,33 @@ To build the library for the latest version of the game run:
 Xcode might not work so you should use Unix makefiles
 
 ``` mkdir build && cd build && cmake .. -G "Unix Makefiles" && cmake --build . ```
+
 To compile on linux you need folowing dependecies
+
     freetype
+    
     x11
+    
     xrandr
+    
     udev
+    
     opengl
+    
     flac
+    
     ogg
+    
     vorbis
+    
     vorbisenc
+    
     vorbisfile
+    
     openal
+    
     pthread
+
 
 **Remember to be in game directory!**
 
