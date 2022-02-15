@@ -50,6 +50,10 @@ To compile on linux you need folowing dependecies
     
     pthread
 
+ You can also install sfml package.
+
+
+
 
 **Remember to be in game directory!**
 
