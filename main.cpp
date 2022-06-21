@@ -130,9 +130,7 @@ int colide() {
 
 }
 /*
-
 void map_init() {
-
 	platforms[0].Position = Vector2f(140, 600);
 	platforms[0].Size = Vector2f(200, 40);
 	platforms[1].Position = Vector2f(100, 200);
@@ -145,8 +143,6 @@ void map_init() {
 	doors[0].x_y = Vector2f(1000, 90);
 	doors[0].update();
 	doors[0].shape.setTexture(doors_txt);
-
-
 }
 */
 
@@ -312,8 +308,6 @@ void mapf_init(std::string &mapfilename){
 	platforms[3].Size = Vector2f(400, 40);
 	doors.Size = Vector2f(50, 50);
 	doors.x_y = Vector2f(1000, 110);
-
-
 	doors.shape.setPosition(-1000, -1000);
 	for (int i = 0; i < killernumber; i++)
 	{
@@ -324,7 +318,6 @@ void mapf_init(std::string &mapfilename){
 	treasure.Size = Vector2f(60, 40);
 	treasure.update();
 	treasure.shape.setTexture(treasure_txt);
-
 } */
 
 	
@@ -401,11 +394,11 @@ int main()
 			if (colide()) {
 				
 				if (player.getPosition().x + 45 < platforms[colide() - 1].Position.x) {
-					velocity.x = 0;
+					if(velocity.x > 0)velocity.x = 0;
 					fall = 1;
 					velocity.y = fall;
 				} else if (player.getPosition().x > (platforms[colide() - 1].Position.x + platforms[colide() - 1].Size.x -5)) {
-					velocity.x = 0;
+					if(velocity.x < 0)velocity.x = 0;
 					fall = 1;
 					velocity.y = fall;
 
