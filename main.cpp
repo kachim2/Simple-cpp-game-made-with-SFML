@@ -1,3 +1,4 @@
+//https://pastebin.com/uUKAgE1y
 #include <SFML/Graphics.hpp> // gra używa biblioteki SFML ze strony https://www.sfml-dev.org/
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
