@@ -419,7 +419,7 @@ int main()
 				jump_able = true;
 			}
 
-			if (jump_able && (Keyboard::isKeyPressed(Keyboard::Space) || Keyboard::isKeyPressed(Keyboard::Up))) fall = -6.5f;
+			if (jump_able && (Keyboard::isKeyPressed(Keyboard::Space) || Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W))) fall = -6.5f;
 			jump_able = false;
 		}
 
