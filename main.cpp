@@ -1,9 +1,12 @@
-//https://pastebin.com/uUKAgE1y
 #include <SFML/Graphics.hpp> // gra używa biblioteki SFML ze strony https://www.sfml-dev.org/
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
+#include <SFML/Network.hpp>
+#include <mutex>
+#include <thread>
 #include <fstream>
 #include <iostream>
+#include <vector>
 bool dot = 0;
 using namespace sf;
 bool erroro = false;
@@ -21,18 +24,60 @@ Vector2i mapsize = Vector2i(1280, 720);
 sf::View view;
 RenderWindow window{ VideoMode(1280,720), "C++ Game" };
 Sprite player(player_txt1, IntRect(0,0,50,50));
+std::vector<Sprite>otherplayers;
 Sprite ground;
 FloatRect next_position;
 Vector2f velocity;
+Vector2f Positionfornet;
 Text You_Won;
 Font font;
 int level = 1;
 int killernumber = 0;
 int platforms_number = 4;
 bool playertxt = 0;
-
 bool jump_able;
-
+std::mutex opu;
+std::mutex possm;
+bool Networking(){
+	
+	TcpSocket socket;
+	std::cerr << 1;
+	Socket::Status status = socket.connect("127.0.0.1", 5300);
+	
+	if (status != Socket::Done){
+		
+		return 0;
+	}
+	Int32 ammountofplayers, Xpos, Ypos;
+	while (1){
+	Packet Spacket, Rpacket;
+	possm.lock();
+	Xpos = Positionfornet.x;
+	Ypos = Positionfornet.y;
+	possm.unlock();
+	Spacket << Xpos << Ypos;
+	socket.send(Spacket);
+	socket.receive(Rpacket);
+	Rpacket >> ammountofplayers;
+	std::vector<Int32> opsX(ammountofplayers);
+	std::vector<Int32> opsY(ammountofplayers);
+	socket.receive(Rpacket);
+	for(int i = 0; i < ammountofplayers; i++){
+		Rpacket >> opsX[i];
+		Rpacket >> opsY[i];
+	}
+	for(int i = 0; i < ammountofplayers; i++){
+		if(otherplayers.size() <= i)
+		otherplayers.push_back(Sprite(player_txt1, IntRect(0,0,50,50)));
+		otherplayers[i].setPosition(Vector2f(opsX[i],opsY[i]));
+	}
+	for(int i = otherplayers.size(); i >ammountofplayers; i--){
+		otherplayers.pop_back();
+	}
+	
+	}
+	return 1;
+}
 
 class Obstacle
 {
@@ -130,22 +175,7 @@ int colide() {
 
 
 }
-/*
-void map_init() {
-	platforms[0].Position = Vector2f(140, 600);
-	platforms[0].Size = Vector2f(200, 40);
-	platforms[1].Position = Vector2f(100, 200);
-	platforms[1].Size = Vector2f(400, 40);
-	platforms[2].Position = Vector2f(450, 450);
-	platforms[2].Size = Vector2f(400, 40);
-	platforms[3].Position = Vector2f(700, 150);
-	platforms[3].Size = Vector2f(400, 40);
-	doors[0].Size = Vector2f(40, 60);
-	doors[0].x_y = Vector2f(1000, 90);
-	doors[0].update();
-	doors[0].shape.setTexture(doors_txt);
-}
-*/
+
 
 void mapf_init(std::string &mapfilename){
 
@@ -324,8 +354,9 @@ void mapf_init(std::string &mapfilename){
 	
 int main()
 {
+	//otherplayers.push_back(Sprite(player_txt1, IntRect(0,0,50,50)));
 	doors_txt.loadFromFile("assets/door.png");
-	
+	std::thread nett(Networking);
 	
 	doors[0].update();
 	doors[0].shape.setTexture(doors_txt);
@@ -459,7 +490,11 @@ int main()
 		{
 			platforms[i].draw();
 		}
-
+		opu.lock();
+		for(int i = 0; i < otherplayers.size(); i++){
+			window.draw(otherplayers[i]);
+		}
+		opu.unlock();
 		for (int i = 0; i < killernumber; i++)
 		{
 			killer[i].draw();
@@ -506,6 +541,9 @@ int main()
 		
 		
 		player.move(velocity);
+		possm.lock();
+		Positionfornet = player.getPosition();
+		possm.unlock();
 		velocity = Vector2f(0, 0);
 		if (!(fall < 0.1f && fall > -0.1f))
 		{
@@ -581,3 +619,4 @@ int main()
 
 
 }	
+
