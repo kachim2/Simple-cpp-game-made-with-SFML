@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include "SHA256.h"
 bool dot = 0;
 using namespace sf;
 bool erroro = false;
@@ -36,12 +37,17 @@ int killernumber = 0;
 int platforms_number = 4;
 bool playertxt = 0;
 bool jump_able;
+bool stop = 0;
+SHA256 msha;
+uint8_t * digestp;
+uint8_t mhash[32];
+std::mutex mhashm;
 std::mutex opu;
 std::mutex possm;
 bool Networking(){
 	
 	TcpSocket socket;
-	std::cerr << 1;
+	//std::cerr << 1;
 	Socket::Status status = socket.connect("127.0.0.1", 5300);
 	
 	if (status != Socket::Done){
@@ -55,16 +61,20 @@ bool Networking(){
 	Xpos = Positionfornet.x;
 	Ypos = Positionfornet.y;
 	possm.unlock();
-	Spacket << Xpos << Ypos;
+	mhashm.lock();
+	Spacket << Xpos << Ypos << mhash;
+	mhashm.unlock();
 	socket.send(Spacket);
 	socket.receive(Rpacket);
 	Rpacket >> ammountofplayers;
 	std::vector<Int32> opsX(ammountofplayers);
 	std::vector<Int32> opsY(ammountofplayers);
+	std::vector<Int8> side(ammountofplayers);
 	socket.receive(Rpacket);
 	for(int i = 0; i < ammountofplayers; i++){
 		Rpacket >> opsX[i];
 		Rpacket >> opsY[i];
+		Rpacket >> side[i];
 	}
 	for(int i = 0; i < ammountofplayers; i++){
 		if(otherplayers.size() <= i)
@@ -74,11 +84,21 @@ bool Networking(){
 	for(int i = otherplayers.size(); i >ammountofplayers; i--){
 		otherplayers.pop_back();
 	}
-	
+	if (stop) {
+		return 0;
 	}
-	return 1;
+	}
+	return 0;
 }
-
+std::string readFileIntoString(const std::string& path) {
+	std::ifstream input_file(path);
+	if (!input_file.is_open()) {
+		std::cerr << "Could not open the file - '"
+			<< path << "'" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+}
 class Obstacle
 {
 
@@ -180,6 +200,15 @@ int colide() {
 void mapf_init(std::string &mapfilename){
 
 	std::fstream mapf;
+	mhashm.lock();
+	std::string s = readFileIntoString(mapfilename);
+	msha.update(s);
+	digestp = msha.digest();
+	mhashm.unlock();
+	for (int i = 0; i < 32; i++) {
+		mhash[i] = digestp[i];
+	}
+	
 	mapf.open(mapfilename, std::ios_base::in);
 	if(!mapf.is_open()){
 		std::cerr << "file is not opened";
@@ -396,6 +425,7 @@ int main()
 		window.pollEvent(event);
 		if (event.type == Event::Closed)
 		{
+			stop = 1;
 			return 0;
 		}
 		if (event.type == Event::Resized){
@@ -598,7 +628,7 @@ int main()
 
 	}
 	
-	
+	stop = 1;
 	
 	You_Won.setString("You Won");
 	You_Won.setFont(font);
