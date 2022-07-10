@@ -38,17 +38,18 @@ int platforms_number = 4;
 bool playertxt = 0;
 bool jump_able;
 bool stop = 0;
+uint8_t mside = 0;
 SHA256 msha;
 uint8_t * digestp;
 uint8_t mhash[32];
+std::mutex msm;
 std::mutex mhashm;
 std::mutex opu;
 std::mutex possm;
 bool Networking(){
-	
 	TcpSocket socket;
 	//std::cerr << 1;
-	Socket::Status status = socket.connect("127.0.0.1", 5300);
+	Socket::Status status = socket.connect("betterweb.gq", 5300);
 	
 	if (status != Socket::Done){
 		
@@ -62,29 +63,63 @@ bool Networking(){
 	Ypos = Positionfornet.y;
 	possm.unlock();
 	mhashm.lock();
-	Spacket << Xpos << Ypos << mhash;
+	msm.lock();
+	Spacket << Xpos << Ypos << mside;
+	for(int i = 0; i < 32; i++){
+		Spacket << mhash[i];
+	}
+	msm.unlock();
 	mhashm.unlock();
+	
 	socket.send(Spacket);
 	socket.receive(Rpacket);
 	Rpacket >> ammountofplayers;
 	std::vector<Int32> opsX(ammountofplayers);
 	std::vector<Int32> opsY(ammountofplayers);
-	std::vector<Int8> side(ammountofplayers);
+	std::vector<uint8_t> side(ammountofplayers);
+	//std::cerr << ammountofplayers;
 	socket.receive(Rpacket);
 	for(int i = 0; i < ammountofplayers; i++){
 		Rpacket >> opsX[i];
 		Rpacket >> opsY[i];
 		Rpacket >> side[i];
 	}
+	
 	for(int i = 0; i < ammountofplayers; i++){
 		if(otherplayers.size() <= i)
 		otherplayers.push_back(Sprite(player_txt1, IntRect(0,0,50,50)));
 		otherplayers[i].setPosition(Vector2f(opsX[i],opsY[i]));
+		if(side[i] > 3){
+		otherplayers[i].setScale(-1, 1);
+		side[i]-=4;
+		}
+		else{
+		otherplayers[i].setScale(1, 1);
+		}
+		//std::cerr << (int)side[i];
+		switch (side[i])
+		{
+		case 0:
+			otherplayers[i].setTexture(player_txt1);
+			break;
+		case 1:
+			otherplayers[i].setTexture(player_txt2);
+			break;
+		case 2:
+			otherplayers[i].setTexture(player_idle);
+			break;
+		case 3:
+			otherplayers[i].setTexture(jump_txt);
+			break;
+		default:
+			break;
+		}
 	}
 	for(int i = otherplayers.size(); i >ammountofplayers; i--){
 		otherplayers.pop_back();
 	}
 	if (stop) {
+		socket.disconnect();
 		return 0;
 	}
 	}
@@ -532,18 +567,24 @@ int main()
 
 		
 		
-
+			msm.lock();
 			if (timer.getElapsedTime().asSeconds() > 0.2f && !velocity.x == 0)
 			{
 
 				if (!playertxt) {
 					playertxt = 1;
 					player.setTexture(player_txt2);
+					
+					mside = 0;
+					
 				}
 				else
 				{
 					playertxt = 0;
 					player.setTexture(player_txt1);
+					
+					mside = 1;
+					
 				}
 				timer.restart();
 			}
@@ -551,6 +592,9 @@ int main()
 			{
 				player.setTexture(player_idle);
 				playertxt = 0;
+				
+				mside = 2;
+				
 			}
 			if (velocity.x < 0)
 			{
@@ -560,6 +604,8 @@ int main()
 					player.setPosition(player.getPosition().x + 50, player.getPosition().y);
 				}
 				player.setScale(-1, 1);
+
+
 			}
 			else {
 				if (player.getScale().x < 0)
@@ -567,6 +613,8 @@ int main()
 					player.setPosition(player.getPosition().x - 50, player.getPosition().y);
 				}
 				player.setScale(1, 1);
+
+
 			}
 		
 		
@@ -574,12 +622,20 @@ int main()
 		possm.lock();
 		Positionfornet = player.getPosition();
 		possm.unlock();
-		velocity = Vector2f(0, 0);
+		
 		if (!(fall < 0.1f && fall > -0.1f))
 		{
 			player.setTexture(jump_txt);
+			
+			mside = 3;
 		}
+		if (velocity.x < 0){
 
+			mside +=4;
+			
+		}
+		msm.unlock();
+		velocity = Vector2f(0, 0);
 		//WORKING ON VIEWS
 		if (window.getSize().x < mapsize.x){
 			if((!(player.getPosition().x - window.getSize().x/2 <= 50)) && (!(player.getPosition().x + window.getSize().x/2 >= mapsize.x))){
