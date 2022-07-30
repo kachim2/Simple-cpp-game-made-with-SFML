@@ -226,6 +226,19 @@ int colide() {
 
 
 	}
+	for (int j = 0; j < otherplayers.size(); j++) {
+		FloatRect ObstacleBounds = otherplayers[j].getGlobalBounds();
+		if (ObstacleBounds.intersects(next_position))
+		{
+			if (otherplayers[j].getPosition().y - player.getPosition().y > 30) {
+				player.setPosition(40, 400);
+			}
+			ret = j;
+
+		}
+
+
+	}
 	return ret + 1;
 
 
