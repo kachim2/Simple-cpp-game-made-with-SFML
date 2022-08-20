@@ -78,7 +78,7 @@ bool Networking(){
 	std::vector<Int32> opsY(ammountofplayers);
 	std::vector<uint8_t> side(ammountofplayers);
 	//std::cerr << ammountofplayers;
-	socket.receive(Rpacket);
+
 	for(int i = 0; i < ammountofplayers; i++){
 		Rpacket >> opsX[i];
 		Rpacket >> opsY[i];
