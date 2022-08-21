@@ -23,6 +23,7 @@ Texture endplat;
 Texture doors_txt;
 Vector2i mapsize = Vector2i(1280, 720);
 sf::View view;
+std::vector<RectangleShape> particles;
 RenderWindow window{ VideoMode(1280,720), "C++ Game" };
 Sprite player(player_txt1, IntRect(0,0,50,50));
 std::vector<Sprite>otherplayers;
@@ -46,6 +47,7 @@ std::mutex msm;
 std::mutex mhashm;
 std::mutex opu;
 std::mutex possm;
+std::mutex stopm;
 bool Networking(){
 	TcpSocket socket;
 	//std::cerr << 1;
@@ -86,8 +88,11 @@ bool Networking(){
 	}
 	
 	for(int i = 0; i < ammountofplayers; i++){
-		if(otherplayers.size() <= i)
-		otherplayers.push_back(Sprite(player_txt1, IntRect(0,0,50,50)));
+		if (otherplayers.size() <= i)
+		{
+			otherplayers.push_back(Sprite(player_txt1, IntRect(0, 0, 50, 50)));
+			otherplayers[i].setColor(Color::Red);
+		}
 		otherplayers[i].setPosition(Vector2f(opsX[i],opsY[i]));
 		if(side[i] > 3){
 		otherplayers[i].setScale(-1, 1);
@@ -118,11 +123,19 @@ bool Networking(){
 	for(int i = otherplayers.size(); i >ammountofplayers; i--){
 		otherplayers.pop_back();
 	}
+	stopm.lock();
 	if (stop) {
-		socket.disconnect();
+//		socket.disconnect();
+//		msm.unlock();
+//		mhashm.unlock();
+//		opu.unlock();
+//		possm.unlock();
+		stopm.unlock();
 		return 0;
 	}
+	stopm.unlock();
 	}
+	
 	return 0;
 }
 std::string readFileIntoString(const std::string& path) {
@@ -246,7 +259,10 @@ int colide() {
 
 
 void mapf_init(std::string &mapfilename){
-
+	particles.clear();
+	mapsize.x = 1280;
+	mapsize.y = 720;
+	view.setCenter(1280 / 2, 720 / 2);
 	std::fstream mapf;
 	mhashm.lock();
 	std::string s = readFileIntoString(mapfilename);
@@ -429,8 +445,9 @@ void mapf_init(std::string &mapfilename){
 } */
 
 	
-int main()
+int main(int argc, char** argv)
 {
+	std::cout << argc;
 	//otherplayers.push_back(Sprite(player_txt1, IntRect(0,0,50,50)));
 	doors_txt.loadFromFile("assets/door.png");
 	std::thread nett(Networking);
@@ -446,12 +463,14 @@ int main()
 	view.setCenter(1280/2, 720/2);
 	view.setSize(Vector2f(1280, 720));
 	window.setView(view);
-	
+	view.zoom(1.0f);
 	font.loadFromFile("assets/arial.ttf");
 	player_idle.loadFromFile("assets/Idle.png");
 	std::string nextmapname = "maps/fmap.map";	
-
+	
 	Clock timer;
+	Clock timerp;
+	Clock pftimer;
 	player_txt1.loadFromFile("assets/playerrun1.png");
 	player_txt2.loadFromFile("assets/playerrun2.png");
 	jump_txt.loadFromFile("assets/jump.png");
@@ -461,28 +480,29 @@ int main()
 	//map_init();
 	mapf_init(nextmapname);
 
-	window.setFramerateLimit(120);
+	//window.setFramerateLimit(20);
 	middle.setSmooth(0);
-	
-	
+	float rtimer;
+	player.setColor(Color(0, 0, 0));
 	while (true) {
 		
+		rtimer = pftimer.getElapsedTime().asSeconds()*120;
+		pftimer.restart();
 		if (erroro) return 1;
 
 		Event event;
 		window.pollEvent(event);
 		if (event.type == Event::Closed)
 		{
+			stopm.lock();
 			stop = 1;
+			stopm.unlock();
+			nett.join();
 			return 0;
 		}
 		if (event.type == Event::Resized){
-			if (window.getSize().x < 1279){
-			view.setSize(window.getSize().x, view.getSize().y);
-			}
-			if (window.getSize().y < 719){
-			view.setSize(view.getSize().x, window.getSize().y);}
-			window.setView(view);
+		
+
 			
 		}
 
@@ -492,7 +512,7 @@ int main()
 		{
 			velocity.y = fall;
 			
-			fall += 0.08f;
+			fall += 0.08f*rtimer;
 		}
 		else
 		{
@@ -533,7 +553,8 @@ int main()
 			jump_able = false;
 		}
 
-		
+		velocity.x = velocity.x*rtimer;
+		velocity.y = velocity.y*rtimer;
 
 		if (player.getPosition().y < 1)
 		{
@@ -559,6 +580,7 @@ int main()
 			}
 		}
 		
+		
 		//drawing all
 		window.clear(Color::Blue);
 		window.draw(ground);
@@ -581,6 +603,27 @@ int main()
 		
 		
 			msm.lock();
+			if (timerp.getElapsedTime().asMilliseconds() > 100) {
+				for (int i = 0; i < otherplayers.size(); i++) {
+					Texture histxt = *otherplayers[i].getTexture();
+					Image hispix = histxt.copyToImage();
+					if (histxt.copyToImage().getPixel(22, 42) != player_idle.copyToImage().getPixel(22, 42) && histxt.copyToImage().getPixel(14, 38) != jump_txt.copyToImage().getPixel(14, 38)) {
+					particles.push_back(RectangleShape(sf::Vector2f(40.0f, 40.0f)));
+					particles[particles.size() - 1].setPosition(Vector2f(otherplayers[i].getPosition().x + 5, otherplayers[i].getPosition().y + 30));
+					particles[particles.size() - 1].setFillColor(Color(128, 128, 128, 120));
+					}
+
+				}
+				//std::cerr << 'g';
+			}
+			if (timerp.getElapsedTime().asMilliseconds() > 100 && !velocity.x == 0) {
+				timerp.restart();
+				particles.push_back(RectangleShape(sf::Vector2f(40.0f, 40.0f)));
+				particles[particles.size() - 1].setPosition(Vector2f( player.getPosition().x+5, player.getPosition().y+30));
+				particles[particles.size() - 1].setFillColor(Color(128, 128, 128, 120));
+				//std::cerr << 's';
+			}
+
 			if (timer.getElapsedTime().asSeconds() > 0.2f && !velocity.x == 0)
 			{
 
@@ -630,7 +673,21 @@ int main()
 
 			}
 		
-		
+		for (int i = 0; i < particles.size(); i++)
+		{
+			window.draw(particles[i]);
+			particles[i].setSize(Vector2f( particles[i].getSize().x - 0.1*rtimer, particles[i].getSize().y - 0.1*rtimer));
+			particles[i].setPosition(Vector2f(particles[i].getPosition().x + 0.05 * rtimer, particles[i].getPosition().y + 0.05 * rtimer));
+			particles[i].rotate(1 * rtimer);
+
+		}
+		for (int i = 0; i < particles.size(); i++) {
+			if (particles[i].getSize().x < 0) {
+				particles.erase(particles.begin()+i);
+			}
+
+		}
+		//std::cout << particles.size();
 		player.move(velocity);
 		possm.lock();
 		Positionfornet = player.getPosition();
@@ -650,26 +707,30 @@ int main()
 		msm.unlock();
 		velocity = Vector2f(0, 0);
 		//WORKING ON VIEWS
-		if (window.getSize().x < mapsize.x){
-			if((!(player.getPosition().x - window.getSize().x/2 <= 50)) && (!(player.getPosition().x + window.getSize().x/2 >= mapsize.x))){
-				if(player.getScale().x == 1.0f)
-					view.setCenter(player.getPosition().x,view.getCenter().y);
+		if (1280 < mapsize.x) {
+			if ((!(player.getPosition().x - 1280 / 2 <= 50)) && (!(player.getPosition().x + 1280 / 2 >= mapsize.x))) {
+				if (player.getScale().x == 1.0f)
+					view.setCenter(player.getPosition().x, view.getCenter().y);
 				else
-					view.setCenter(player.getPosition().x-50,view.getCenter().y);
-			}else if(player.getPosition().x - window.getSize().x/2 <= 50){
-				view.setCenter(window.getSize().x/2,view.getCenter().y);	
-			}else {
-				view.setCenter(mapsize.x - window.getSize().x/2,view.getCenter().y);
+					view.setCenter(player.getPosition().x - 50, view.getCenter().y);
+			}
+			else if (player.getPosition().x - 1280 / 2 <= 50) {
+				view.setCenter(1280 / 2, view.getCenter().y);
+			}
+			else {
+				view.setCenter(mapsize.x - 1280 / 2, view.getCenter().y);
 
 			}
 		}
-		if (window.getSize().y < mapsize.y){
-			if((!(player.getPosition().y - window.getSize().y/2 <= 0)) && (!(player.getPosition().y + window.getSize().y/2 >= mapsize.y))){
-			view.setCenter(view.getCenter().x, player.getPosition().y);
-			}else if(player.getPosition().y - window.getSize().y/2 <= 0){
-				view.setCenter(view.getCenter().x,window.getSize().y/2);	
-			}else {
-				view.setCenter(view.getCenter().x, mapsize.y - window.getSize().y/2);
+		if (720 < mapsize.y) {
+			if ((!(player.getPosition().y - 720 / 2 <= 0)) && (!(player.getPosition().y + 720 / 2 >= mapsize.y))) {
+				view.setCenter(view.getCenter().x, player.getPosition().y);
+			}
+			else if (player.getPosition().y - 720 / 2 <= 0) {
+				view.setCenter(view.getCenter().x, 720 / 2);
+			}
+			else {
+				view.setCenter(view.getCenter().x, mapsize.y - 720 / 2);
 
 			}
 		}
@@ -716,6 +777,10 @@ int main()
 	}
 
 
-
+	stopm.lock();
+	stop = 1;
+	stopm.unlock();
+	nett.join();
+	return 0;
 }	
 
