@@ -1,0 +1,46 @@
+killertxtnum 1
+killertxt 0 assets/lava.png
+killern 21 
+mapsize 1280 2896
+platformn 19
+platform 0 size 144 40 pos 0 2800
+platform 1 size 80 40 pos 912 2096
+platform 2 size 80 40 pos 464 2640
+platform 3 size 80 40 pos 0 2496
+platform 4 size 80 40 pos 0 2240
+platform 5 size 80 40 pos 400 2032
+platform 6 size 80 40 pos 528 1600
+platform 7 size 80 40 pos 144 1072
+platform 8 size 80 40 pos 1200 656
+platform 9 size 1216 40 pos 64 80
+platform 10 size 80 40 pos 0 288
+platform 11 size 192 40 pos 1056 1904
+platform 12 size 80 40 pos 832 1744
+platform 13 size 192 40 pos 48 1440
+platform 14 size 80 40 pos 512 1232
+platform 15 size 80 40 pos 560 880
+platform 16 size 80 40 pos 912 816
+platform 17 size 80 40 pos 1088 416
+platform 18 size 288 40 pos 384 448
+killer 0 size 1280 32 pos 0 2864
+killer 1 size 1264 16 pos 16 2848
+killer 2 size 16 16 pos 240 2784
+killer 3 size 16 16 pos 0 2848
+killer 4 size 16 16 pos 368 2576
+killer 5 size 16 16 pos 224 2384
+killer 6 size 16 16 pos 304 2192
+killer 7 size 16 16 pos 864 1920
+killer 8 size 16 16 pos 352 1536
+killer 9 size 16 16 pos 1152 1600
+killer 10 size 16 16 pos 1008 784
+killer 11 size 16 16 pos 880 336
+killer 12 size 16 16 pos 0 0
+killer 13 size 16 16 pos 144 1984
+killer 14 size 16 16 pos 304 1168
+killer 15 size 16 16 pos 784 832
+killer 16 size 16 16 pos 704 416
+killer 17 size 16 16 pos 256 352
+killer 18 size 16 16 pos 464 928
+killer 19 size 16 16 pos 1152 704
+killer 20 size 16 16 pos 992 128
+dot tre pos 1216 48

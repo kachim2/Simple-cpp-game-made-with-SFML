@@ -1,7 +1,7 @@
 killertxtnum 0
 killern 1
 platformn 4
-platform 0 size 200 40 pos 160 620
+platform 0 size 200 40 pos 160 600
 platform 1 size 400 40 pos 100 200
 platform 2 size 400 40 pos 450 450
 platform 3 size 400 40 pos 700 150

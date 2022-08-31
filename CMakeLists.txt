@@ -7,7 +7,7 @@ add_subdirectory(sfml EXCLUDE_FROM_ALL)
 
 
 add_executable(Cpp_Game main.cpp SHA256.cpp)
-target_link_libraries(Cpp_Game PUBLIC sfml-graphics sfml-window sfml-system sfml-network)
+target_link_libraries(Cpp_Game PUBLIC sfml-graphics sfml-window sfml-system sfml-network sfml-audio)
 
 
 target_include_directories(Cpp_Game PUBLIC

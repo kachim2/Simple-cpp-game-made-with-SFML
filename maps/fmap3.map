@@ -11,5 +11,5 @@ platform 1 size 400 40 pos 100 200
 platform 2 size 400 40 pos 450 450
 platform 3 size 400 40 pos 700 150
 platform 4 size 400 40 pos 1300 200
-dot tre pos 1500 160
+dot door maps/fmap4.map pos 1500 160
 killertxtindex 1 1 end

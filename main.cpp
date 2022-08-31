@@ -2,12 +2,14 @@
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Network.hpp>
+#include <SFML/Audio.hpp>
 #include <mutex>
 #include <thread>
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include "SHA256.h"
+sf::Sound loseS;
 bool dot = 0;
 using namespace sf;
 bool erroro = false;
@@ -243,8 +245,9 @@ int colide() {
 		FloatRect ObstacleBounds = otherplayers[j].getGlobalBounds();
 		if (ObstacleBounds.intersects(next_position))
 		{
-			if (otherplayers[j].getPosition().y - player.getPosition().y > 30) {
-				player.setPosition(40, 400);
+			if (player.getPosition().y - otherplayers[j].getPosition().y > 37) {
+				player.setPosition(40, mapsize.y - 320);
+				loseS.play();
 			}
 			ret = j;
 
@@ -282,7 +285,9 @@ void mapf_init(std::string &mapfilename){
 		return;
 	}
 	std::string arg;
-	player.setPosition(40, 400);
+	
+	ground.setPosition(Vector2f(0, mapsize.y - 33));
+	ground.setTextureRect(IntRect(0, 0, mapsize.x, 37));
 	while (mapf.good())
 	{
 		int val = 0;
@@ -399,7 +404,9 @@ void mapf_init(std::string &mapfilename){
 			}
 
 		}
+		
 	}
+	player.setPosition(40, mapsize.y -320);
 	
 	for (int i = 0; i < killernumber; i++)
 	{
@@ -451,6 +458,25 @@ int main(int argc, char** argv)
 	//otherplayers.push_back(Sprite(player_txt1, IntRect(0,0,50,50)));
 	doors_txt.loadFromFile("assets/door.png");
 	std::thread nett(Networking);
+	sf::SoundBuffer musicbuffer;
+	if (!musicbuffer.loadFromFile("assets/music.wav"))
+		return -1;
+	sf::Sound music;
+	music.setBuffer(musicbuffer);
+	music.setLoop(true);
+	music.setVolume(50.f);
+	music.play();
+	sf::SoundBuffer jump1buffer;
+	if (!jump1buffer.loadFromFile("assets/jump1.wav"))
+		return -1;
+	sf::Sound jump1;
+	jump1.setBuffer(jump1buffer);
+	sf::SoundBuffer losebuffer;
+	if (!losebuffer.loadFromFile("assets/lose.wav"))
+		return -1;
+	
+	loseS.setBuffer(losebuffer);
+	
 	
 	doors[0].update();
 	doors[0].shape.setTexture(doors_txt);
@@ -466,15 +492,18 @@ int main(int argc, char** argv)
 	view.zoom(1.0f);
 	font.loadFromFile("assets/arial.ttf");
 	player_idle.loadFromFile("assets/Idle.png");
-	std::string nextmapname = "maps/fmap.map";	
-	
+	std::string nextmapname = "maps/fmap.map";
+
+	if (argc == 2)
+		nextmapname = argv[0];
+		
 	Clock timer;
 	Clock timerp;
 	Clock pftimer;
 	player_txt1.loadFromFile("assets/playerrun1.png");
 	player_txt2.loadFromFile("assets/playerrun2.png");
 	jump_txt.loadFromFile("assets/jump.png");
-	player.setPosition(40, 400);
+	player.setPosition(40, mapsize.y - 320);
 	float fall = 0;
 	
 	//map_init();
@@ -549,7 +578,13 @@ int main(int argc, char** argv)
 				jump_able = true;
 			}
 
-			if (jump_able && (Keyboard::isKeyPressed(Keyboard::Space) || Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W))) fall = -6.5f;
+			if (jump_able && (Keyboard::isKeyPressed(Keyboard::Space) || Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W))) { 
+				fall = -6.5f; 
+
+				jump1.setPosition(player.getPosition().x + 20-640, 0, 0);
+				jump1.setAttenuation(0.001f);
+				jump1.play();
+			}
 			jump_able = false;
 		}
 
@@ -574,8 +609,8 @@ int main(int argc, char** argv)
 		{
 			if (killer[i].shape.getGlobalBounds().intersects(player.getGlobalBounds())) {
 
-				player.setPosition(40, 400);
-	
+				player.setPosition(40, mapsize.y - 320); (40, 400);
+				loseS.play();
 
 			}
 		}
