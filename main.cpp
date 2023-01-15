@@ -53,7 +53,7 @@ std::mutex stopm;
 bool Networking(){
 	TcpSocket socket;
 	//std::cerr << 1;
-	Socket::Status status = socket.connect("betterweb.gq", 5300);
+	Socket::Status status = socket.connect("betterweb.ga", 5300);
 	
 	if (status != Socket::Done){
 		
