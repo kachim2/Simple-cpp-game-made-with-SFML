@@ -34,7 +34,7 @@ jobs:
 
     - name: Build
       shell: bash
-      run: cmake --build build --config Release
+      run: cmake --build build --config Release && ls && pwd
 
     - name: Install
       shell: bash
