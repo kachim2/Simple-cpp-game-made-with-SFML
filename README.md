@@ -9,21 +9,24 @@ git
 C++ compiler with c++ 11 support
 
 ## Download code
-Remember to clone Repository recursively
 
-``` git clone https://github.com/kachim2/Simple-cpp-game-made-with-SFML.git --recursive ```
+``` git clone https://github.com/kachim2/Simple-cpp-game-made-with-SFML.git ```
 ## Compilation
 To build the library for the latest version of the game run:
 ### Widows/Linux
-``` mkdir build && cd build && cmake .. && cmake --build . ```
+``` mkdir build 
+cd build 
+cmake .. 
+cmake --build . -j8```
+Use appropriate number of thread for your system.
 
 
 ### Mac Os
 #### Unsupported!!!
-Xcode might not work so you should use Unix makefiles
+It might work, or might not.
 
-``` mkdir build && cd build && cmake .. -G "Unix Makefiles" && cmake --build . ```
 
+## Note
 To compile on linux you need folowing dependecies
 
     freetype
@@ -50,7 +53,7 @@ To compile on linux you need folowing dependecies
     
     pthread
 
- You can also install sfml package.
+
 
 
 
