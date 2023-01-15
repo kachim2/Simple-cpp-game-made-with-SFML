@@ -43,4 +43,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.platform.name }} ${{ matrix.config.name }}
-        path: ./build
+        path: ./build/bin/
