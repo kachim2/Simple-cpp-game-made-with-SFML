@@ -34,8 +34,13 @@ jobs:
 
     - name: Build
       shell: bash
-      run: cmake --build build --config Release && ls && pwd
+      run: cmake --build build --config Release 
 
     - name: Install
       shell: bash
       run: cmake --install build --config Release
+    - name: Upload build
+      uses: actions/upload-artifact@v3
+      with:
+        name: my-artifact 
+        path: ./build
