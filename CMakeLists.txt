@@ -16,11 +16,11 @@ if (WIN32 AND BUILD_SHARED_LIBS)
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:Cpp_Game> $<TARGET_FILE_DIR:Cpp_Game> COMMAND_EXPAND_LISTS)
 endif()
 add_custom_target(copy_assets
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/bin/assets ${CMAKE_CURRENT_BINARY_DIR}/bin/assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/bin/assets
 )
 add_dependencies(Cpp_Game copy_assets)
 add_custom_target(copy_maps
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/bin/maps ${CMAKE_CURRENT_BINARY_DIR}/bin/maps
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}//maps ${CMAKE_CURRENT_BINARY_DIR}/bin/maps
 )
 add_dependencies(Cpp_Game copy_maps)
 target_include_directories(Cpp_Game PRIVATE
