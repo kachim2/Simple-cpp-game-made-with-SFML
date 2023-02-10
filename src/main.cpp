@@ -26,8 +26,8 @@ Texture doors_txt;
 Vector2i mapsize = Vector2i(1280, 720);
 sf::View view;
 std::vector<RectangleShape> particles;
-RenderWindow window{ VideoMode(1280,720), "C++ Game" };
-Sprite player(player_txt1, IntRect(0,0,50,50));
+RenderWindow window{ VideoMode({1280,720}), "C++ Game" };
+Sprite player(player_txt1, IntRect({0,0},{50,50}));
 std::vector<Sprite>otherplayers;
 Sprite ground;
 FloatRect next_position;
@@ -49,7 +49,7 @@ std::mutex msm;
 std::mutex mhashm;
 std::mutex opu;
 std::mutex possm;
-std::mutex stopm;
+std::mutex stopm;/*
 bool Networking(){
 	TcpSocket socket;
 	//std::cerr << 1;
@@ -140,6 +140,7 @@ bool Networking(){
 	
 	return 0;
 }
+*/
 std::string readFileIntoString(const std::string& path) {
 	std::ifstream input_file(path);
 	if (!input_file.is_open()) {
@@ -166,8 +167,8 @@ public:
 	void update() {
 		
 		shape.setPosition(x_y);
-		shape.setScale(1, 1);
-		shape.setTextureRect(IntRect(0, 0, Size.x, Size.y));
+		shape.setScale({1, 1});
+		shape.setTextureRect(IntRect({0, 0}, {(int)Size.x, (int)Size.y}));
 	}
 	void draw(){
 		window.draw(shape);
@@ -206,7 +207,7 @@ public:
 		end.x_y = Position;
 		end.Size = Vector2f(40, Size.y);
 		end.update();
-		end.shape.setScale(1, 1);
+		end.shape.setScale({1, 1});
 		end.draw();
 		middlee.x_y = Vector2f(Position.x + 40, Position.y);
 		middlee.Size = Vector2f(Size.x - 80, Size.y);
@@ -215,7 +216,7 @@ public:
 		end.x_y = Vector2f(Position.x + Size.x, Position.y);
 		end.Size = Vector2f(40, Size.y);
 		end.update();
-		end.shape.setScale(-1, 1);
+		end.shape.setScale({-1, 1});
 		end.draw();
 
 	}
@@ -233,7 +234,7 @@ int colide() {
 		ObstacleBounds.top = platforms[j].Position.y;
 		ObstacleBounds.height = platforms[j].Size.y;
 		ObstacleBounds.width = platforms[j].Size.x;
-		if (ObstacleBounds.intersects(next_position))
+		if (ObstacleBounds.findIntersection(next_position))
 		{
 			ret = j;
 
@@ -243,10 +244,10 @@ int colide() {
 	}
 	for (int j = 0; j < otherplayers.size(); j++) {
 		FloatRect ObstacleBounds = otherplayers[j].getGlobalBounds();
-		if (ObstacleBounds.intersects(next_position))
+		if (ObstacleBounds.findIntersection(next_position))
 		{
 			if (player.getPosition().y - otherplayers[j].getPosition().y > 37) {
-				player.setPosition(40, mapsize.y - 320);
+				player.setPosition({40, (float)mapsize.y - 320});
 				loseS.play();
 			}
 			ret = j;
@@ -265,7 +266,7 @@ void mapf_init(std::string &mapfilename){
 	particles.clear();
 	mapsize.x = 1280;
 	mapsize.y = 720;
-	view.setCenter(1280 / 2, 720 / 2);
+	view.setCenter({1280 / 2, 720 / 2});
 	std::fstream mapf;
 	mhashm.lock();
 	std::string s = readFileIntoString(mapfilename);
@@ -287,7 +288,7 @@ void mapf_init(std::string &mapfilename){
 	std::string arg;
 	
 	ground.setPosition(Vector2f(0, mapsize.y - 33));
-	ground.setTextureRect(IntRect(0, 0, mapsize.x, 37));
+	ground.setTextureRect(IntRect({0, 0}, {mapsize.x, 37}));
 	while (mapf.good())
 	{
 		int val = 0;
@@ -378,7 +379,7 @@ void mapf_init(std::string &mapfilename){
 		}else if(arg == "mapsize"){
 			mapf >> mapsize.x >> mapsize.y;
 			ground.setPosition(Vector2f(0, mapsize.y-33));
-			ground.setTextureRect(IntRect(0, 0, mapsize.x, 37));
+			ground.setTextureRect(IntRect({0, 0}, {mapsize.x, 37}));
 		}else if(arg == "killertxtnum"){
 			int arg2 = 0;
 			mapf >> arg2;
@@ -406,7 +407,7 @@ void mapf_init(std::string &mapfilename){
 		}
 		
 	}
-	player.setPosition(40, mapsize.y -320);
+	player.setPosition({40, (float)mapsize.y -320});
 	
 	for (int i = 0; i < killernumber; i++)
 	{
@@ -422,7 +423,7 @@ void mapf_init(std::string &mapfilename){
 	
 	killernumber = 1;
 	
-	player.setPosition(40, 400);
+	player.setPosition({40, 400});
 	killer_txt[0].loadFromFile("killer.png");
 	killer_txt[0].setRepeated(1);
 	
@@ -457,7 +458,7 @@ int main(int argc, char** argv)
 	std::cout << argc;
 	//otherplayers.push_back(Sprite(player_txt1, IntRect(0,0,50,50)));
 	doors_txt.loadFromFile("assets/door.png");
-	std::thread nett(Networking);
+	//std::thread nett(Networking);
 	sf::SoundBuffer musicbuffer;
 	if (!musicbuffer.loadFromFile("assets/music.wav"))
 		return -1;
@@ -483,10 +484,10 @@ int main(int argc, char** argv)
 	player_idle.setSmooth(0);
 	player_txt1.setSmooth(0);
 	player_txt2.setSmooth(0);
-	ground.setTextureRect(IntRect(0, 0, 1280, 37));
+	ground.setTextureRect(IntRect({0, 0}, {1280, 37}));
 	ground.setPosition(Vector2f(0, mapsize.y-33));
 	ground.setTexture(middle);
-	view.setCenter(1280/2, 720/2);
+	view.setCenter({1280/2, 720/2});
 	view.setSize(Vector2f(1280, 720));
 	window.setView(view);
 	view.zoom(1.0f);
@@ -503,7 +504,7 @@ int main(int argc, char** argv)
 	player_txt1.loadFromFile("assets/playerrun1.png");
 	player_txt2.loadFromFile("assets/playerrun2.png");
 	jump_txt.loadFromFile("assets/jump.png");
-	player.setPosition(40, mapsize.y - 320);
+	player.setPosition({40, (float)mapsize.y - 320});
 	float fall = 0;
 	
 	//map_init();
@@ -526,7 +527,7 @@ int main(int argc, char** argv)
 			stopm.lock();
 			stop = 1;
 			stopm.unlock();
-			nett.join();
+			//nett.join();
 			return 0;
 		}
 		if (event.type == Event::Resized){
@@ -552,8 +553,8 @@ int main(int argc, char** argv)
 
 			if (colide()) {
 				
-				if (player.getPosition().x + 45 < platforms[colide() - 1].Position.x) {
-					if(velocity.x > 0)velocity.x = 0;
+			if (player.getPosition().x + 45 < platforms[colide() - 1].Position.x) {
+				if(velocity.x > 0)velocity.x = 0;
 					fall = 1;
 					velocity.y = fall;
 				} else if (player.getPosition().x > (platforms[colide() - 1].Position.x + platforms[colide() - 1].Size.x -5)) {
@@ -562,18 +563,16 @@ int main(int argc, char** argv)
 					velocity.y = fall;
 
 				} else if (platforms[colide() - 1].Position.y > player.getPosition().y) {
-					player.setPosition(player.getPosition().x, platforms[colide() - 1].Position.y - 50);
+					player.setPosition({player.getPosition().x, platforms[colide() - 1].Position.y - 50});
 					fall = 0.001f;
 					jump_able = true;
 				}
-				else
-				{
-					player.setPosition(player.getPosition().x, platforms[colide() - 1].Position.y + 51);
+				else{
+					player.setPosition({player.getPosition().x, platforms[colide() - 1].Position.y + 51});
 					fall = 0.1;
 				}
 			}
-			else
-			{
+			else{
 				fall = 0.001f;
 				jump_able = true;
 			}
@@ -581,7 +580,7 @@ int main(int argc, char** argv)
 			if (jump_able && (Keyboard::isKeyPressed(Keyboard::Space) || Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W))) { 
 				fall = -6.5f; 
 
-				jump1.setPosition(player.getPosition().x + 20-640, 0, 0);
+				//jump1.setPosition({player.getPosition().x + 20-640}, {0, 0});
 				jump1.setAttenuation(0.001f);
 				jump1.play();
 			}
@@ -594,10 +593,10 @@ int main(int argc, char** argv)
 		if (player.getPosition().y < 1)
 		{
 			fall = 0.1f;
-			player.setPosition(player.getPosition().x, 5);
+			player.setPosition({player.getPosition().x, 5});
 		}
 		if(!dot){
-		if (player.getGlobalBounds().intersects(doors[0].shape.getGlobalBounds()))
+		if (player.getGlobalBounds().findIntersection(doors[0].shape.getGlobalBounds()))
 		{
 			//std::cerr << nextmapname;
 			mapf_init(nextmapname);
@@ -607,9 +606,9 @@ int main(int argc, char** argv)
 
 		for (int i = 0; i < killernumber; i++)
 		{
-			if (killer[i].shape.getGlobalBounds().intersects(player.getGlobalBounds())) {
+			if (killer[i].shape.getGlobalBounds().findIntersection(player.getGlobalBounds())) {
 
-				player.setPosition(40, mapsize.y - 320); (40, 400);
+				player.setPosition({40, (float)mapsize.y - 320}); (40, 400);
 				loseS.play();
 
 			}
@@ -642,7 +641,7 @@ int main(int argc, char** argv)
 				for (int i = 0; i < otherplayers.size(); i++) {
 					Texture histxt = *otherplayers[i].getTexture();
 					Image hispix = histxt.copyToImage();
-					if (histxt.copyToImage().getPixel(22, 42) != player_idle.copyToImage().getPixel(22, 42) && histxt.copyToImage().getPixel(14, 38) != jump_txt.copyToImage().getPixel(14, 38)) {
+					if (histxt.copyToImage().getPixel({22, 42}) != player_idle.copyToImage().getPixel({22, 42}) && histxt.copyToImage().getPixel({14, 38}) != jump_txt.copyToImage().getPixel({14, 38})) {
 					particles.push_back(RectangleShape(sf::Vector2f(40.0f, 40.0f)));
 					particles[particles.size() - 1].setPosition(Vector2f(otherplayers[i].getPosition().x + 5, otherplayers[i].getPosition().y + 30));
 					particles[particles.size() - 1].setFillColor(Color(128, 128, 128, 120));
@@ -692,18 +691,18 @@ int main(int argc, char** argv)
 
 				if (player.getScale().x > 0)
 				{
-					player.setPosition(player.getPosition().x + 50, player.getPosition().y);
+					player.setPosition({player.getPosition().x + 50, player.getPosition().y});
 				}
-				player.setScale(-1, 1);
+				player.setScale({-1, 1});
 
 
 			}
 			else {
 				if (player.getScale().x < 0)
 				{
-					player.setPosition(player.getPosition().x - 50, player.getPosition().y);
+					player.setPosition({player.getPosition().x - 50, player.getPosition().y});
 				}
-				player.setScale(1, 1);
+				player.setScale({1, 1});
 
 
 			}
@@ -713,7 +712,7 @@ int main(int argc, char** argv)
 			window.draw(particles[i]);
 			particles[i].setSize(Vector2f( particles[i].getSize().x - 0.1*rtimer, particles[i].getSize().y - 0.1*rtimer));
 			particles[i].setPosition(Vector2f(particles[i].getPosition().x + 0.05 * rtimer, particles[i].getPosition().y + 0.05 * rtimer));
-			particles[i].rotate(1 * rtimer);
+			particles[i].rotate(sf::degrees( 1 * rtimer));
 
 		}
 		for (int i = 0; i < particles.size(); i++) {
@@ -745,27 +744,27 @@ int main(int argc, char** argv)
 		if (1280 < mapsize.x) {
 			if ((!(player.getPosition().x - 1280 / 2 <= 50)) && (!(player.getPosition().x + 1280 / 2 >= mapsize.x))) {
 				if (player.getScale().x == 1.0f)
-					view.setCenter(player.getPosition().x, view.getCenter().y);
+					view.setCenter({player.getPosition().x, view.getCenter().y});
 				else
-					view.setCenter(player.getPosition().x - 50, view.getCenter().y);
+					view.setCenter({player.getPosition().x - 50, view.getCenter().y});
 			}
 			else if (player.getPosition().x - 1280 / 2 <= 50) {
-				view.setCenter(1280 / 2, view.getCenter().y);
+				view.setCenter({1280 / 2, view.getCenter().y});
 			}
 			else {
-				view.setCenter(mapsize.x - 1280 / 2, view.getCenter().y);
+				view.setCenter({(float)mapsize.x - 1280 / 2, (float)view.getCenter().y});
 
 			}
 		}
 		if (720 < mapsize.y) {
 			if ((!(player.getPosition().y - 720 / 2 <= 0)) && (!(player.getPosition().y + 720 / 2 >= mapsize.y))) {
-				view.setCenter(view.getCenter().x, player.getPosition().y);
+				view.setCenter({view.getCenter().x, player.getPosition().y});
 			}
 			else if (player.getPosition().y - 720 / 2 <= 0) {
-				view.setCenter(view.getCenter().x, 720 / 2);
+				view.setCenter({view.getCenter().x, 720 / 2});
 			}
 			else {
-				view.setCenter(view.getCenter().x, mapsize.y - 720 / 2);
+				view.setCenter({view.getCenter().x, (float)mapsize.y - 720 / 2});
 
 			}
 		}
@@ -784,7 +783,7 @@ int main(int argc, char** argv)
 		
 		window.display();
 		if (dot){
-		if (player.getGlobalBounds().intersects(treasure[0].shape.getGlobalBounds()))
+		if (player.getGlobalBounds().findIntersection(treasure[0].shape.getGlobalBounds()))
 		{
 			break;
 		}
@@ -798,10 +797,10 @@ int main(int argc, char** argv)
 	You_Won.setString("You Won");
 	You_Won.setFont(font);
 	You_Won.setCharacterSize(300);
-	You_Won.setPosition(50, 150);
+	You_Won.setPosition({50, 150});
 	Clock clock;
-	view.setCenter(1280/2, 720/2);
-	view.setSize(1280, 720);
+	view.setCenter({1280/2, 720/2});
+	view.setSize({1280, 720});
 	window.setView(view);
 	while (clock.getElapsedTime().asSeconds() < 5)
 	{
@@ -815,7 +814,7 @@ int main(int argc, char** argv)
 	stopm.lock();
 	stop = 1;
 	stopm.unlock();
-	nett.join();
+	//nett.join();
 	return 0;
 }	
 
