@@ -27,7 +27,7 @@ Vector2i mapsize = Vector2i(1280, 720);
 sf::View view;
 std::vector<RectangleShape> particles;
 RenderWindow window{VideoMode({1280, 720}), "C++ Game"};
-Sprite player(player_txt1, IntRect({0, 0}, {50, 50}));
+
 std::vector<Sprite> otherplayers;
 Sprite ground;
 FloatRect next_position;
@@ -141,6 +141,11 @@ std::mutex stopm; /*
 	 return 0;
  }
  */
+struct playerdata
+{
+	float fall = 0;
+};
+
 std::string readFileIntoString(const std::string &path)
 {
 	std::ifstream input_file(path);
@@ -223,7 +228,7 @@ public:
 	}
 };
 Platform *platforms = new Platform[4];
-int colide()
+int colide(Sprite &player)
 {
 	int ret = -1;
 	FloatRect Player_Bounds = player.getGlobalBounds();
@@ -250,14 +255,14 @@ int colide()
 			{
 				player.setPosition({40, (float)mapsize.y - 320});
 				loseS.play();
+				ret = j;
 			}
-			ret = j;
 		}
 	}
 	return ret + 1;
 }
 
-void mapf_init(std::string &mapfilename)
+void mapf_init(std::string &mapfilename, Sprite &player)
 {
 	particles.clear();
 	mapsize.x = 1280;
@@ -474,7 +479,8 @@ bool On_frame(Clock &timer,
 			  float &rtimer,
 			  float &fall,
 			  sf::Sound &jump1,
-			  std::string &nextmapname)
+			  std::string &nextmapname,
+			  Sprite &player)
 {
 	rtimer = pftimer.getElapsedTime().asSeconds() * 120;
 	pftimer.restart();
@@ -499,7 +505,7 @@ bool On_frame(Clock &timer,
 		velocity.x += 3;
 	if (Keyboard::isKeyPressed(Keyboard::A) || Keyboard::isKeyPressed(Keyboard::Left))
 		velocity.x -= 3;
-	if (player.getPosition().y + fall < mapsize.y - 80 && !colide()) // jump and colisions
+	if (player.getPosition().y + fall < mapsize.y - 80 && !colide(player)) // jump and colisions
 	{
 		velocity.y = fall;
 
@@ -512,32 +518,32 @@ bool On_frame(Clock &timer,
 			player.setPosition(Vector2f(player.getPosition().x, mapsize.y - 80));
 		}
 
-		if (colide())
+		if (colide(player))
 		{
 
-			if (player.getPosition().x + 45 < platforms[colide() - 1].Position.x)
+			if (player.getPosition().x + 45 < platforms[colide(player) - 1].Position.x)
 			{
 				if (velocity.x > 0)
 					velocity.x = 0;
 				fall = 1;
 				velocity.y = fall;
 			}
-			else if (player.getPosition().x > (platforms[colide() - 1].Position.x + platforms[colide() - 1].Size.x - 5))
+			else if (player.getPosition().x > (platforms[colide(player) - 1].Position.x + platforms[colide(player) - 1].Size.x - 5))
 			{
 				if (velocity.x < 0)
 					velocity.x = 0;
 				fall = 1;
 				velocity.y = fall;
 			}
-			else if (platforms[colide() - 1].Position.y > player.getPosition().y)
+			else if (platforms[colide(player) - 1].Position.y > player.getPosition().y)
 			{
-				player.setPosition({player.getPosition().x, platforms[colide() - 1].Position.y - 50});
+				player.setPosition({player.getPosition().x, platforms[colide(player) - 1].Position.y - 50});
 				fall = 0.001f;
 				jump_able = true;
 			}
 			else
 			{
-				player.setPosition({player.getPosition().x, platforms[colide() - 1].Position.y + 51});
+				player.setPosition({player.getPosition().x, platforms[colide(player) - 1].Position.y + 51});
 				fall = 0.1;
 			}
 		}
@@ -571,7 +577,7 @@ bool On_frame(Clock &timer,
 		if (player.getGlobalBounds().intersects(doors[0].shape.getGlobalBounds()))
 		{
 			// std::cerr << nextmapname;
-			mapf_init(nextmapname);
+			mapf_init(nextmapname, player);
 		}
 	}
 
@@ -761,6 +767,13 @@ bool On_frame(Clock &timer,
 }
 int main(int argc, char **argv)
 {
+	std::vector<Sprite> players;
+	players.push_back(Sprite(player_txt1, IntRect({0, 0}, {50, 50})));
+	players.push_back(Sprite(player_txt1, IntRect({0, 0}, {50, 50})));
+	std::vector<playerdata> pd;
+	pd.push_back(playerdata());
+	pd.push_back(playerdata());
+	// Sprite player1(player_txt1, IntRect({0, 0}, {50, 50}));
 	std::cout << argc;
 	// otherplayers.push_back(Sprite(player_txt1, IntRect(0,0,50,50)));
 	doors_txt.loadFromFile("assets/door.png");
@@ -809,21 +822,33 @@ int main(int argc, char **argv)
 	player_txt1.loadFromFile("assets/playerrun1.png");
 	player_txt2.loadFromFile("assets/playerrun2.png");
 	jump_txt.loadFromFile("assets/jump.png");
-	player.setPosition({40, (float)mapsize.y - 320});
-	float fall = 0;
+	players[0].setPosition({40, (float)mapsize.y - 320});
+	players[1].setPosition({640, (float)mapsize.y - 320});
 
 	// map_init();
-	mapf_init(nextmapname);
+	mapf_init(nextmapname, players[0]);
 
 	// window.setFramerateLimit(20);
 	middle.setSmooth(0);
 	float rtimer;
-	player.setColor(Color(0, 0, 0));
+	for (auto &i : players)
+		i.setColor(Color(0, 0, 0));
+
 	while (true)
 	{
-		if (On_frame(timer, timerp, pftimer, rtimer, fall, jump1, nextmapname))
+
+		for (int i = 0; i < players.size(); i++)
 		{
-			break;
+			otherplayers.clear();
+			for (int j = 0; j < players.size(); j++)
+			{
+				if (i != j)
+					otherplayers.push_back(players[j]);
+			}
+			if (On_frame(timer, timerp, pftimer, rtimer, pd[i].fall, jump1, nextmapname, players[i]))
+			{
+				break;
+			}
 		}
 	}
 
