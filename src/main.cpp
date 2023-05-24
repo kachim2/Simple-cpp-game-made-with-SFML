@@ -8,9 +8,13 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <atomic>
 #include "SHA256.h"
+#include "ai.hpp"
+std::ofstream lout;
 sf::Sound loseS;
 bool dot = 0;
+const int framesperai = 60 * 10;
 using namespace sf;
 bool erroro = false;
 Texture *killer_txt = new Texture[1];
@@ -49,10 +53,94 @@ std::mutex msm;
 std::mutex mhashm;
 std::mutex opu;
 std::mutex possm;
-std::mutex stopm; /*
+std::mutex stopm;
+// std::mutex stoooop;
+std::atomic<bool> pause = 1;
+std::atomic<bool> stoop = 0;
+std::atomic<bool> recieved = 0;
+std::atomic<int> gen = 0;
+void irec()
+{
+	recieved = 0;
+	while (!recieved)
+	{
+	}
+	recieved = 0;
+}
+void rec()
+{
+	recieved = 1;
+}
+void stpns()
+{
+	std::string stp;
+	while (true)
+	{
+		std::cerr << "\n>>";
+		stp = "";
+		std::getline(std::cin, stp);
+		if (stp == "stop")
+		{
+
+			std::cerr << "Stopping.\n";
+			stoop = true;
+			return;
+		}
+		else if (stp == "progress")
+		{
+
+			std::cerr << "Currently on generation " << gen << ".\n";
+		}
+		else if (stp == "start" or stp == "resume")
+		{
+
+			pause = 0;
+			irec();
+		}
+		else if (stp == "save")
+		{
+
+			pause = 1;
+			irec();
+			std::string filename;
+			std::cerr << "Filename: ";
+			std::getline(std::cin, filename);
+			std::ofstream wf(filename, std::ios::out | std::ios::binary);
+
+			wf.write((char *)&mai::topais[0], mai::topais.size() * sizeof(mai::ainetwork));
+
+			wf.close();
+			pause = 0;
+			irec();
+		}
+		else if (stp == "read")
+		{
+			pause = 1;
+			irec();
+			std::string filename;
+			std::cerr << "Filename: ";
+			std::getline(std::cin, filename);
+			std::ifstream rf(filename, std::ios::in | std::ios::binary);
+			rf.read((char *)&mai::topais[0], mai::topais.size() * sizeof(mai::ainetwork));
+			rf.close();
+			pause = 0;
+			irec();
+		}
+		else if (stp == "pause")
+		{
+
+			pause = 1;
+			irec();
+		}
+		else
+		{
+			std::cerr << "Unknown command.";
+		}
+	}
+} /*
  bool Networking(){
 	 TcpSocket socket;
-	 //std::cerr << 1;
+	 //lout << 1;
 	 Socket::Status status = socket.connect("betterweb.ga", 5300);
 
 	 if (status != Socket::Done){
@@ -81,7 +169,7 @@ std::mutex stopm; /*
 	 std::vector<Int32> opsX(ammountofplayers);
 	 std::vector<Int32> opsY(ammountofplayers);
 	 std::vector<uint8_t> side(ammountofplayers);
-	 //std::cerr << ammountofplayers;
+	 //lout << ammountofplayers;
 
 	 for(int i = 0; i < ammountofplayers; i++){
 		 Rpacket >> opsX[i];
@@ -103,7 +191,7 @@ std::mutex stopm; /*
 		 else{
 		 otherplayers[i].setScale(1, 1);
 		 }
-		 //std::cerr << (int)side[i];
+		 //lout << (int)side[i];
 		 switch (side[i])
 		 {
 		 case 0:
@@ -151,8 +239,8 @@ std::string readFileIntoString(const std::string &path)
 	std::ifstream input_file(path);
 	if (!input_file.is_open())
 	{
-		std::cerr << "Could not open the file - '"
-				  << path << "'" << std::endl;
+		lout << "Could not open the file - '"
+			 << path << "'" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
@@ -181,13 +269,21 @@ public:
 	}
 	void draw()
 	{
-		window.draw(shape);
+		// window.draw(shape);
 	}
 };
 Obstacle *treasure;
 Obstacle *doors = new Obstacle[1];
 Obstacle *killer = new Obstacle[1];
-
+std::vector<Sprite *> Obstaclestosprite()
+{
+	std::vector<Sprite *> out;
+	for (int i = 0; i < killernumber; i++)
+	{
+		out.push_back(&killer[i].shape);
+	}
+	return out;
+}
 class Platform
 {
 public:
@@ -227,7 +323,31 @@ public:
 		end.draw();
 	}
 };
+
 Platform *platforms = new Platform[4];
+std::vector<RectangleShape *> Platformtosprite()
+{
+	std::vector<RectangleShape *> out;
+	for (int i = 0; i < platforms_number; i++)
+	{
+		out.push_back(&platforms[i].shape);
+	}
+	return out;
+}
+void killz(Sprite &player, int pn)
+{
+	for (int j = 0; j < otherplayers.size(); j++)
+	{
+		FloatRect ObstacleBounds = otherplayers[j].getGlobalBounds();
+		if (ObstacleBounds.intersects(next_position))
+		{
+			if (otherplayers[j].getPosition().y - player.getPosition().y > 37)
+			{
+				mai::topais[pn].itskills += mai::kmp;
+			}
+		}
+	}
+}
 int colide(Sprite &player)
 {
 	int ret = -1;
@@ -255,8 +375,9 @@ int colide(Sprite &player)
 			{
 				player.setPosition({40, (float)mapsize.y - 320});
 				loseS.play();
-				ret = j;
 			}
+
+			ret = j;
 		}
 	}
 	return ret + 1;
@@ -282,7 +403,7 @@ void mapf_init(std::string &mapfilename, Sprite &player)
 	mapf.open(mapfilename, std::ios_base::in);
 	if (!mapf.is_open())
 	{
-		std::cerr << "file is not opened";
+		lout << "file is not opened";
 		Clock errorclock;
 		while (errorclock.getElapsedTime().asSeconds() < 5)
 			;
@@ -344,6 +465,7 @@ void mapf_init(std::string &mapfilename, Sprite &player)
 				int val2, val3{0};
 				mapf >> val2 >> val3;
 				platforms[val].Size = Vector2f(val2, val3);
+				platforms[val].shape.setSize(Vector2f(val2, val3));
 			}
 			mapf >> arg2;
 			if (arg2 == "pos")
@@ -351,6 +473,7 @@ void mapf_init(std::string &mapfilename, Sprite &player)
 				int val2, val3{0};
 				mapf >> val2 >> val3;
 				platforms[val].Position = Vector2f(val2, val3);
+				platforms[val].shape.setPosition(Vector2f(val2, val3));
 			}
 		}
 		else if (arg == "dot")
@@ -480,15 +603,15 @@ bool On_frame(Clock &timer,
 			  float &fall,
 			  sf::Sound &jump1,
 			  std::string &nextmapname,
-			  Sprite &player)
+			  Sprite &player,
+			  const int pn)
 {
-	rtimer = pftimer.getElapsedTime().asSeconds() * 120;
-	pftimer.restart();
+	rtimer = 2.0;
 	if (erroro)
 		return 1;
 
 	Event event;
-	window.pollEvent(event);
+	// window.pollEvent(event);
 	if (event.type == Event::Closed)
 	{
 		stopm.lock();
@@ -500,10 +623,10 @@ bool On_frame(Clock &timer,
 	if (event.type == Event::Resized)
 	{
 	}
-
-	if (Keyboard::isKeyPressed(Keyboard::D) || Keyboard::isKeyPressed(Keyboard::Right))
+	std::array<bool, 3> movement = mai::runstep(mai::topais[pn], player, otherplayers, Obstaclestosprite(), Platformtosprite(), window);
+	if (Keyboard::isKeyPressed(Keyboard::D) || Keyboard::isKeyPressed(Keyboard::Right) || movement[0])
 		velocity.x += 3;
-	if (Keyboard::isKeyPressed(Keyboard::A) || Keyboard::isKeyPressed(Keyboard::Left))
+	if (Keyboard::isKeyPressed(Keyboard::A) || Keyboard::isKeyPressed(Keyboard::Left) || movement[2])
 		velocity.x -= 3;
 	if (player.getPosition().y + fall < mapsize.y - 80 && !colide(player)) // jump and colisions
 	{
@@ -553,7 +676,7 @@ bool On_frame(Clock &timer,
 			jump_able = true;
 		}
 
-		if (jump_able && (Keyboard::isKeyPressed(Keyboard::Space) || Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W)))
+		if (jump_able && (Keyboard::isKeyPressed(Keyboard::Space) || Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W) || movement[1]))
 		{
 			fall = -6.5f;
 
@@ -576,7 +699,7 @@ bool On_frame(Clock &timer,
 	{
 		if (player.getGlobalBounds().intersects(doors[0].shape.getGlobalBounds()))
 		{
-			// std::cerr << nextmapname;
+			// lout << nextmapname;
 			mapf_init(nextmapname, player);
 		}
 	}
@@ -593,8 +716,8 @@ bool On_frame(Clock &timer,
 	}
 
 	// drawing all
-	window.clear(Color::Blue);
-	window.draw(ground);
+
+	// window.draw(ground);
 	if (!dot)
 		doors[0].draw();
 	for (int i = 0; i < platforms_number; i++)
@@ -604,7 +727,7 @@ bool On_frame(Clock &timer,
 	opu.lock();
 	for (int i = 0; i < otherplayers.size(); i++)
 	{
-		window.draw(otherplayers[i]);
+		// window.draw(otherplayers[i]);
 	}
 	opu.unlock();
 	for (int i = 0; i < killernumber; i++)
@@ -626,7 +749,7 @@ bool On_frame(Clock &timer,
 				particles[particles.size() - 1].setFillColor(Color(128, 128, 128, 120));
 			}
 		}
-		// std::cerr << 'g';
+		// lout << 'g';
 	}
 	if (timerp.getElapsedTime().asMilliseconds() > 100 && !velocity.x == 0)
 	{
@@ -634,12 +757,11 @@ bool On_frame(Clock &timer,
 		particles.push_back(RectangleShape(sf::Vector2f(40.0f, 40.0f)));
 		particles[particles.size() - 1].setPosition(Vector2f(player.getPosition().x + 5, player.getPosition().y + 30));
 		particles[particles.size() - 1].setFillColor(Color(128, 128, 128, 120));
-		// std::cerr << 's';
+		// lout << 's';
 	}
 
 	if (timer.getElapsedTime().asSeconds() > 0.2f && !velocity.x == 0)
 	{
-
 		if (!playertxt)
 		{
 			playertxt = 1;
@@ -665,7 +787,6 @@ bool On_frame(Clock &timer,
 	}
 	if (velocity.x < 0)
 	{
-
 		if (player.getScale().x > 0)
 		{
 			player.setPosition({player.getPosition().x + 50, player.getPosition().y});
@@ -683,7 +804,7 @@ bool On_frame(Clock &timer,
 
 	for (int i = 0; i < particles.size(); i++)
 	{
-		window.draw(particles[i]);
+		// window.draw(particles[i]);
 		particles[i].setSize(Vector2f(particles[i].getSize().x - 0.1 * rtimer, particles[i].getSize().y - 0.1 * rtimer));
 		particles[i].setPosition(Vector2f(particles[i].getPosition().x + 0.05 * rtimer, particles[i].getPosition().y + 0.05 * rtimer));
 		particles[i].rotate(1 * rtimer);
@@ -695,7 +816,7 @@ bool On_frame(Clock &timer,
 			particles.erase(particles.begin() + i);
 		}
 	}
-	// std::cout << particles.size();
+	// lout << particles.size();
 	player.move(velocity);
 	possm.lock();
 	Positionfornet = player.getPosition();
@@ -709,7 +830,6 @@ bool On_frame(Clock &timer,
 	}
 	if (velocity.x < 0)
 	{
-
 		mside += 4;
 	}
 	msm.unlock();
@@ -748,14 +868,16 @@ bool On_frame(Clock &timer,
 			view.setCenter({view.getCenter().x, (float)mapsize.y - 720 / 2});
 		}
 	}
-	window.setView(view);
+	// window.setView(view);
 
 	next_position = player.getGlobalBounds();
 	if (dot)
 		treasure[0].draw();
-	window.draw(player);
-
-	window.display();
+	// window.draw(player);
+	// mai::castrayso(player, otherplayers);
+	// window.display();
+	// window.clear(Color::Blue);
+	killz(player, pn);
 	if (dot)
 	{
 		if (player.getGlobalBounds().intersects(treasure[0].shape.getGlobalBounds()))
@@ -767,6 +889,9 @@ bool On_frame(Clock &timer,
 }
 int main(int argc, char **argv)
 {
+	lout.rdbuf()->pubsetbuf(0, 0);
+	lout.open("logs.txt");
+	std::thread cli(stpns);
 	std::vector<Sprite> players;
 	players.push_back(Sprite(player_txt1, IntRect({0, 0}, {50, 50})));
 	players.push_back(Sprite(player_txt1, IntRect({0, 0}, {50, 50})));
@@ -774,7 +899,7 @@ int main(int argc, char **argv)
 	pd.push_back(playerdata());
 	pd.push_back(playerdata());
 	// Sprite player1(player_txt1, IntRect({0, 0}, {50, 50}));
-	std::cout << argc;
+	lout << argc;
 	// otherplayers.push_back(Sprite(player_txt1, IntRect(0,0,50,50)));
 	doors_txt.loadFromFile("assets/door.png");
 	// std::thread nett(Networking);
@@ -807,7 +932,7 @@ int main(int argc, char **argv)
 	ground.setTexture(middle);
 	view.setCenter({1280 / 2, 720 / 2});
 	view.setSize(Vector2f(1280, 720));
-	window.setView(view);
+	// window.setView(view);
 	view.zoom(1.0f);
 	font.loadFromFile("assets/arial.ttf");
 	player_idle.loadFromFile("assets/Idle.png");
@@ -822,34 +947,63 @@ int main(int argc, char **argv)
 	player_txt1.loadFromFile("assets/playerrun1.png");
 	player_txt2.loadFromFile("assets/playerrun2.png");
 	jump_txt.loadFromFile("assets/jump.png");
-	players[0].setPosition({40, (float)mapsize.y - 320});
-	players[1].setPosition({640, (float)mapsize.y - 320});
 
 	// map_init();
 	mapf_init(nextmapname, players[0]);
 
-	// window.setFramerateLimit(20);
+	// window.setFramerateLimit(3000);
 	middle.setSmooth(0);
 	float rtimer;
 	for (auto &i : players)
 		i.setColor(Color(0, 0, 0));
 
+	mai::BuildAi({192, 96, 48, 48, 16, 16, 8, 4, 3});
+
 	while (true)
 	{
+		rec();
 
-		for (int i = 0; i < players.size(); i++)
+		if (stoop == 1)
 		{
-			otherplayers.clear();
-			for (int j = 0; j < players.size(); j++)
-			{
-				if (i != j)
-					otherplayers.push_back(players[j]);
-			}
-			if (On_frame(timer, timerp, pftimer, rtimer, pd[i].fall, jump1, nextmapname, players[i]))
-			{
-				break;
-			}
+
+			cli.join();
+			mai::deinitialize();
+			lout.close();
+			return 0;
 		}
+
+		if (pause)
+		{
+			continue;
+		}
+		gen++;
+		lout << "generation" << gen << '\n';
+		for (int playern = 0; playern < mai::numofaipergen; playern += players.size())
+		{
+			// lout << "players " << playern << '\n';
+			players[0].setPosition({40, (float)mapsize.y - 320});
+			players[1].setPosition({640, (float)mapsize.y - 320});
+			for (int frame = 0; frame < framesperai; frame++)
+			{
+				for (int i = 0; i < players.size(); i++)
+				{
+					otherplayers.clear();
+					for (int j = 0; j < players.size(); j++)
+					{
+						if (i != j)
+							otherplayers.push_back(players[j]);
+					}
+					if (On_frame(timer, timerp, pftimer, rtimer, pd[i].fall, jump1, nextmapname, players[i], i + playern))
+					{
+						break;
+					}
+				}
+			}
+			mai::topais[playern + 0].itskills += mai::kmp - abs(players[0].getPosition().x - players[1].getPosition().x);
+			mai::topais[playern + 1].itskills += mai::kmp - abs(players[1].getPosition().x - players[0].getPosition().x);
+		}
+
+		mai::genpop();
 	}
 
 	stop = 1;
@@ -861,13 +1015,13 @@ int main(int argc, char **argv)
 	Clock clock;
 	view.setCenter({1280 / 2, 720 / 2});
 	view.setSize({1280, 720});
-	window.setView(view);
+	// window.setView(view);
 	while (clock.getElapsedTime().asSeconds() < 5)
 	{
 
-		window.clear(Color::Blue);
-		window.draw(You_Won);
-		window.display();
+		// window.clear(Color::Blue);
+		// window.draw(You_Won);
+		// window.display();
 	}
 
 	stopm.lock();
