@@ -1,6 +1,6 @@
 #ifndef SHA256_H
 #define SHA256_H
-
+#include<inttypes.h>
 #include <string>
 #include <array>
 
