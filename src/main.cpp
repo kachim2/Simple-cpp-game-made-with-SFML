@@ -139,10 +139,10 @@ bool Networking()
 		if (stop)
 		{
 			socket.disconnect();
-			//		msm.unlock();
-			//		mhashm.unlock();
-			//		opu.unlock();
-			//		possm.unlock();
+			msm.unlock();
+			mhashm.unlock();
+			opu.unlock();
+			possm.unlock();
 			stopm.unlock();
 			return 0;
 		}
@@ -825,7 +825,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	stop = 1;
+	// stop = 1;
 
 	You_Won.setString("You Won");
 	You_Won.setFont(font);
