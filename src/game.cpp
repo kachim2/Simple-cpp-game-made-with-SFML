@@ -40,9 +40,17 @@ game::game(int argc, char **argv){
     player.setPosition({40, (float)mapsize.y - 320});
     mapf_init(nextmapname);
     doors_txt.loadFromFile("assets/door.png");
-    nett = std::thread(&game::Networking, this);
+
     player.setColor(Color(0, 0, 0));
 
+}
+game::~game(){
+    delete digestp;
+    delete treasure;
+    delete[] doors;
+    delete[] killer;
+    delete[] platforms;
+    delete[] killer_txt;
 }
 Obstacle::Obstacle( sf::Texture txt, sf::Vector2f Start_Size, sf::Vector2f Start_x_y) {
 
@@ -462,25 +470,24 @@ int game::step(){
     if (erroro)
         return 1;
 
+    if (graphics) {
+        window.pollEvent(event);
+        if (event.type == Event::Closed) {
+            std::cerr << "out";
+            stopm.lock();
+            stop = 1;
+            stopm.unlock();
+            // nett.join();
+            return 1;
+        }
+        if (event.type == Event::Resized) {
+        }
 
-    window.pollEvent(event);
-    if (event.type == Event::Closed)
-    {
-        std::cerr << "out";
-        stopm.lock();
-        stop = 1;
-        stopm.unlock();
-        // nett.join();
-        return 1;
+        if (Keyboard::isKeyPressed(Keyboard::D) || Keyboard::isKeyPressed(Keyboard::Right))
+            velocity.x += 3;
+        if (Keyboard::isKeyPressed(Keyboard::A) || Keyboard::isKeyPressed(Keyboard::Left))
+            velocity.x -= 3;
     }
-    if (event.type == Event::Resized)
-    {
-    }
-
-    if (Keyboard::isKeyPressed(Keyboard::D) || Keyboard::isKeyPressed(Keyboard::Right))
-        velocity.x += 3;
-    if (Keyboard::isKeyPressed(Keyboard::A) || Keyboard::isKeyPressed(Keyboard::Left))
-        velocity.x -= 3;
     if (player.getPosition().y + fall < mapsize.y - 80 && !colide()) // jump and colisions
     {
         velocity.y = fall;
@@ -528,17 +535,18 @@ int game::step(){
             fall = 0.001f;
             jump_able = true;
         }
+        if(graphics) {
+            if (jump_able && (Keyboard::isKeyPressed(Keyboard::Space) || Keyboard::isKeyPressed(Keyboard::Up) ||
+                              Keyboard::isKeyPressed(Keyboard::W))) {
+                fall = -6.5f;
 
-        if (jump_able && (Keyboard::isKeyPressed(Keyboard::Space) || Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W)))
-        {
-            fall = -6.5f;
-
-            // jump1.setPosition({player.getPosition().x + 20-640}, {0, 0});
-            jump1.setAttenuation(0.001f);
-            jump1.play();
+                // jump1.setPosition({player.getPosition().x + 20-640}, {0, 0});
+                jump1.setAttenuation(0.001f);
+                jump1.play();
+            }
+            jump_able = false;
         }
-        jump_able = false;
-    }
+        }
 
     velocity.x = velocity.x * rtimer;
     velocity.y = velocity.y * rtimer;
@@ -571,7 +579,7 @@ int game::step(){
 }
 int game::run()
 {
-
+    nett = std::thread(&game::Networking, this);
     // otherplayers.push_back(Sprite(player_txt1, IntRect(0,0,50,50)));
     while (true)
     {

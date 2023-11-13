@@ -11,7 +11,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
 add_executable(Cpp_Game src/main.cpp src/SHA256.cpp
-        src/game.cpp)
+        src/game.cpp
+        src/AIgame.cpp
+        src/AIgame.h
+        src/NNe.cpp
+        src/NNe.h
+)
 target_link_libraries(Cpp_Game PRIVATE sfml-graphics sfml-window sfml-system sfml-network sfml-audio Threads::Threads)
 target_compile_features(Cpp_Game PRIVATE cxx_std_17)
 if (WIN32 AND BUILD_SHARED_LIBS)

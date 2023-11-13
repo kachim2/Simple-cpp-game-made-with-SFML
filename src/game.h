@@ -30,6 +30,7 @@ public:
     void draw(RenderWindow &rwindow);
 
 
+
 };
 class Platform
 {
@@ -46,12 +47,15 @@ public:
 };
 class game {
 public:
+    RenderWindow window{VideoMode({1280, 720}), "C++ Game"};
     game(int argc, char **argv);
+    ~game();
     int run();
     int step();
     int render();
     static Texture white;
-private:
+    bool graphics =1;
+protected:
     sf::Sound loseS;
     bool dot = 0;
 
@@ -68,7 +72,7 @@ private:
     Vector2i mapsize = Vector2i(1280, 720);
     sf::View view;
     std::vector<RectangleShape> particles;
-    RenderWindow window{VideoMode({1280, 720}), "C++ Game"};
+
     Sprite player{player_txt1, IntRect({0, 0}, {50, 50})};
     std::vector<Sprite> otherplayers;
     Sprite ground;
