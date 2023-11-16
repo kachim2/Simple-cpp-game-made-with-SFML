@@ -1,0 +1,6 @@
+[submodule "cmake-build-release/bin/cista"]
+	path = cmake-build-release/bin/cista
+	url = https://github.com/felixguendling/cista.git
+[submodule "cista"]
+	path = cista
+	url = https://github.com/felixguendling/cista.git

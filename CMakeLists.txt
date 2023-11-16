@@ -10,6 +10,8 @@ FetchContent_MakeAvailable(SFML)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
+find_package(OpenMP REQUIRED)
+
 add_executable(Cpp_Game src/main.cpp src/SHA256.cpp
         src/game.cpp
         src/AIgame.cpp
@@ -17,7 +19,10 @@ add_executable(Cpp_Game src/main.cpp src/SHA256.cpp
         src/NNe.cpp
         src/NNe.h
 )
-target_link_libraries(Cpp_Game PRIVATE sfml-graphics sfml-window sfml-system sfml-network sfml-audio Threads::Threads)
+add_subdirectory(cista)
+
+
+target_link_libraries(Cpp_Game PRIVATE cista sfml-graphics sfml-window sfml-system sfml-network sfml-audio Threads::Threads OpenMP::OpenMP_CXX)
 target_compile_features(Cpp_Game PRIVATE cxx_std_17)
 if (WIN32 AND BUILD_SHARED_LIBS)
     add_custom_command(TARGET Cpp_Game POST_BUILD

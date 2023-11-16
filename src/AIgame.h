@@ -12,6 +12,7 @@ public:
     int xv;
     int yv;
     std::vector<float> pixels;
+
     AIgame(int argc, char **argv, int xv, int yv);
 };
 

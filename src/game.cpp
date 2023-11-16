@@ -4,23 +4,23 @@
 
 #include "game.h"
 game::game(int argc, char **argv){
-    player_txt1.loadFromFile("assets/playerrun1.png");
-    player_txt2.loadFromFile("assets/playerrun2.png");
-    jump_txt.loadFromFile("assets/jump.png");
-    middle.loadFromFile("assets/dirt.png");
+    //player_txt1.loadFromFile("assets/playerrun1.png");
+    //player_txt2.loadFromFile("assets/playerrun2.png");
+    //jump_txt.loadFromFile("assets/jump.png");
+    //middle.loadFromFile("assets/dirt.png");
     middle.setRepeated(true);
-    if (!losebuffer.loadFromFile("assets/lose.wav"))
-        return;
-    if (!jump1buffer.loadFromFile("assets/jump1.wav"))
-        return;
-    if (!musicbuffer.loadFromFile("assets/music.wav"))
-        return;
-    if (argc == 2)
-        nextmapname = argv[0];
+//    if (!losebuffer.loadFromFile("assets/lose.wav"))
+//        return;
+//    if (!jump1buffer.loadFromFile("assets/jump1.wav"))
+//        return;
+//    if (!musicbuffer.loadFromFile("assets/music.wav"))
+//        return;
+//    if (argc == 2)
+//        nextmapname = argv[0];
     music.setBuffer(musicbuffer);
     music.setLoop(true);
     music.setVolume(50.f);
-    music.play();
+    //music.play();
     loseS.setBuffer(losebuffer);
     jump1.setBuffer(jump1buffer);
     doors[0].update();
@@ -35,21 +35,27 @@ game::game(int argc, char **argv){
     view.setSize(Vector2f(1280, 720));
     window.setView(view);
     view.zoom(1.0f);
-    font.loadFromFile("assets/arial.ttf");
-    player_idle.loadFromFile("assets/Idle.png");
+    //font.loadFromFile("assets/arial.ttf");
+    //player_idle.loadFromFile("assets/Idle.png");
     player.setPosition({40, (float)mapsize.y - 320});
     mapf_init(nextmapname);
-    doors_txt.loadFromFile("assets/door.png");
+    //doors_txt.loadFromFile("assets/door.png");
 
     player.setColor(Color(0, 0, 0));
 
 }
 game::~game(){
+    if (digestp)
     delete digestp;
+    if (treasure)
     delete treasure;
+    if (doors)
     delete[] doors;
+    if(killer)
     delete[] killer;
+    if(platforms)
     delete[] platforms;
+    if (killer_txt)
     delete[] killer_txt;
 }
 Obstacle::Obstacle( sf::Texture txt, sf::Vector2f Start_Size, sf::Vector2f Start_x_y) {
@@ -192,8 +198,8 @@ std::string readFileIntoString(const std::string &path)
 
 Platform::Platform() {
 
-    middle.loadFromFile("assets/dirt.png");
-    endplat.loadFromFile("assets/dirtkoniec.png");
+    //middle.loadFromFile("assets/dirt.png");
+    //endplat.loadFromFile("assets/dirtkoniec.png");
     end.shape.setTexture(endplat);
     middle.setRepeated(true);
     middlee.shape.setTexture(middle);
@@ -246,7 +252,7 @@ int game::colide()
             if (player.getPosition().y - otherplayers[j].getPosition().y > 37)
             {
                 player.setPosition({40, (float)mapsize.y - 320});
-                loseS.play();
+                //loseS.play();
             }
             ret = j;
         }
@@ -399,7 +405,7 @@ void game::mapf_init(std::string &mapfilename)
             int arg2;
             std::string arg3;
             mapf >> arg2 >> arg3;
-            killer_txt[arg2].loadFromFile(arg3);
+            //killer_txt[arg2].loadFromFile(arg3);
             killer_txt[arg2].setRepeated(1);
         }
         else if (arg == "killertxtindex")
@@ -464,9 +470,9 @@ void game::mapf_init(std::string &mapfilename)
 	treasure.update();
 	treasure.shape.setTexture(treasure_txt);
 } */
-int game::step(){
-    rtimer = pftimer.getElapsedTime().asSeconds() * 120;
-    pftimer.restart();
+int game::step(std::array<bool, 3> in, float dt){
+    rtimer = dt* 120;
+    //pftimer.restart();
     if (erroro)
         return 1;
 
@@ -482,12 +488,12 @@ int game::step(){
         }
         if (event.type == Event::Resized) {
         }
-
-        if (Keyboard::isKeyPressed(Keyboard::D) || Keyboard::isKeyPressed(Keyboard::Right))
-            velocity.x += 3;
-        if (Keyboard::isKeyPressed(Keyboard::A) || Keyboard::isKeyPressed(Keyboard::Left))
-            velocity.x -= 3;
     }
+        if (in[0])
+            velocity.x += 3;
+        if (in[1])
+            velocity.x -= 3;
+
     if (player.getPosition().y + fall < mapsize.y - 80 && !colide()) // jump and colisions
     {
         velocity.y = fall;
@@ -535,17 +541,16 @@ int game::step(){
             fall = 0.001f;
             jump_able = true;
         }
-        if(graphics) {
-            if (jump_able && (Keyboard::isKeyPressed(Keyboard::Space) || Keyboard::isKeyPressed(Keyboard::Up) ||
-                              Keyboard::isKeyPressed(Keyboard::W))) {
+
+            if (jump_able && in[2]) {
                 fall = -6.5f;
 
                 // jump1.setPosition({player.getPosition().x + 20-640}, {0, 0});
                 jump1.setAttenuation(0.001f);
-                jump1.play();
+              //  jump1.play();
             }
             jump_able = false;
-        }
+
         }
 
     velocity.x = velocity.x * rtimer;
@@ -572,7 +577,7 @@ int game::step(){
 
             player.setPosition({40, (float)mapsize.y - 320});
             (40, 400);
-            loseS.play();
+            //loseS.play();
         }
     }
     return 0;
@@ -584,7 +589,7 @@ int game::run()
     while (true)
     {
 
-        if (step() == 1) return 0;
+        //if (step() == 1) return 0;
         if (render() == 1) break;
     }
 

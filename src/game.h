@@ -51,10 +51,11 @@ public:
     game(int argc, char **argv);
     ~game();
     int run();
-    int step();
+    int step(std::array<bool, 3> in, float dt);
     int render();
     static Texture white;
     bool graphics =1;
+    Sprite player{player_txt1, IntRect({0, 0}, {50, 50})};
 protected:
     sf::Sound loseS;
     bool dot = 0;
@@ -73,7 +74,6 @@ protected:
     sf::View view;
     std::vector<RectangleShape> particles;
 
-    Sprite player{player_txt1, IntRect({0, 0}, {50, 50})};
     std::vector<Sprite> otherplayers;
     Sprite ground;
     FloatRect next_position;
@@ -129,7 +129,7 @@ protected:
     bool Networking();
     int colide();
     void mapf_init(std::string &mapfilename);
-    Obstacle *treasure;
+    Obstacle *treasure = nullptr;
     Obstacle *doors = new Obstacle[1];
     Obstacle *killer = new Obstacle[1];
     Platform *platforms = new Platform[4];

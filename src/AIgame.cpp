@@ -6,6 +6,7 @@
 #include "AIgame.h"
 AIgame::AIgame(int argc, char **argv, int xv, int yv) : game{argc, argv}, xv{xv}, yv{yv}{
     pixels = std::vector<float>(xv*yv);
+    window.close();
     this->graphics = 0;
 }
 
@@ -83,10 +84,10 @@ int AIgame::renderpx() {
         draws.pop();
 
         for(int x = s.first.getPosition().x; x< s.first.getPosition().x + s.first.getSize().x; x+= pxppxx){
-            if(x/10 -xb < xv and x/10 -xb > 0)
+            if(x/pxppxx -xb < xv and x/pxppxx -xb > 0)
             for (int y = s.first.getPosition().y; y< s.first.getPosition().y + s.first.getSize().y; y+= pxppxx){
-                if(y/10 -yb < yv and y/10 -yb > 0)
-                pixels[(y/10-yb)*xv+(x/10-xb)] = s.second;
+                if(y/pxppxy -yb < yv and y/pxppxy -yb > 0)
+                pixels[(y/pxppxy-yb)*xv+(x/pxppxx-xb)] = s.second;
             }
         }
 
