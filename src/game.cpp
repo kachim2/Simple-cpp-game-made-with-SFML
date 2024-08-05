@@ -70,7 +70,7 @@ bool game::Networking()
 {
     TcpSocket socket;
     std::cerr << 1;
-    Socket::Status status = socket.connect("130.61.62.195", 5300);
+    Socket::Status status = socket.connect("roguz.eu", 5300);
     std::cerr << 'h';
     if (status != Socket::Done)
     {
