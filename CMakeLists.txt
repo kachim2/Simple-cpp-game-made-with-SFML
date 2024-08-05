@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(Cpp_Game LANGUAGES CXX)
 find_package(Threads REQUIRED)
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
   MESSAGE("MSVC")
 endif()
